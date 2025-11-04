@@ -37,7 +37,10 @@
     </div>
 
     <div class="progress-section">
-      <h3>Marcador total</h3>
+      <div class="score-header">
+        <span>Anna</span>
+        <span>Tiago</span>
+      </div>
       <div class="progress-bar">
         <div id="anna-progress" class="progress anna"></div>
         <div id="tiago-progress" class="progress tiago"></div>
@@ -51,6 +54,8 @@
       <button id="reset">Reiniciar marcador</button>
     </div>
   </div>
+
+  <!-- Firebase -->
 <style>
   body {
   font-family: 'Poppins', sans-serif;
@@ -110,18 +115,27 @@ button:hover {
 }
 
 .stars span {
-  font-size: 28px;
+  font-size: 30px;
   cursor: pointer;
-  color: #ccc;
-  transition: 0.3s;
+  color: #bbb;
+  transition: all 0.2s ease;
 }
 
 .stars span.active {
-  color: #995cd6;
+  color: #ffcc00;
+  text-shadow: 0 0 10px #ffd966;
 }
 
 .progress-section {
-  margin-top: 20px;
+  margin-top: 25px;
+}
+
+.score-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #5a3a99;
 }
 
 .progress-bar {
@@ -131,7 +145,7 @@ button:hover {
   background-color: #eee;
   border-radius: 15px;
   overflow: hidden;
-  margin-top: 10px;
+  position: relative;
 }
 
 .progress {
@@ -167,7 +181,7 @@ button:hover {
   list-style: none;
   padding: 0;
   margin-top: 10px;
-  max-height: 150px;
+  max-height: 180px;
   overflow-y: auto;
 }
 
@@ -180,40 +194,71 @@ button:hover {
   font-size: 14px;
 }
 
-  </style>
+</style>
 
-  <script src="script.js">
-// ----- VARIABLES -----
+  <script type="module" src="script.js">
+        // --- CONFIGURAR FIREBASE ---
+// (Cambiá los valores por los tuyos desde tu panel de Firebase)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { getDatabase, ref, push, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_DOMINIO.firebaseapp.com",
+  databaseURL: "https://TU_DB.firebaseio.com",
+  projectId: "TU_ID",
+  storageBucket: "TU_BUCKET.appspot.com",
+  messagingSenderId: "TU_SENDER_ID",
+  appId: "TU_APP_ID"
+};
+
+// Inicializar Firebase
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// --- ELEMENTOS DOM ---
 const stars = document.querySelectorAll('#stars span');
-let rating = 0;
-const saveBtn = document.getElementById('save');
+const juegoInput = document.getElementById('juego');
 const winnerSelect = document.getElementById('winner');
+const saveBtn = document.getElementById('save');
+const resetBtn = document.getElementById('reset');
 const annaProgress = document.getElementById('anna-progress');
 const tiagoProgress = document.getElementById('tiago-progress');
 const scoreText = document.getElementById('score');
 const historyList = document.getElementById('history');
-const resetBtn = document.getElementById('reset');
-const juegoInput = document.getElementById('juego');
 
-// ----- GUARDADO LOCAL (puede conectarse luego a Firebase) -----
-let resultados = JSON.parse(localStorage.getItem('resultados')) || { Anna: 0, Tiago: 0 };
-let historial = JSON.parse(localStorage.getItem('historial')) || [];
+let rating = 0;
+let resultados = { Anna: 0, Tiago: 0 };
+let historial = [];
 
-// ----- FUNCIONES -----
+// --- ESTRELLAS INTERACTIVAS ---
 stars.forEach(star => {
   star.addEventListener('click', () => {
-    rating = star.dataset.value;
+    rating = parseInt(star.dataset.value);
     stars.forEach(s => s.classList.remove('active'));
     for (let i = 0; i < rating; i++) stars[i].classList.add('active');
   });
 });
 
+// --- CARGAR DATOS DESDE FIREBASE ---
+async function cargarDatos() {
+  const snapshot = await get(ref(db, "modoTablero/"));
+  if (snapshot.exists()) {
+    const data = snapshot.val();
+    resultados = data.resultados || { Anna: 0, Tiago: 0 };
+    historial = data.historial || [];
+  }
+  updateProgress();
+  renderHistory();
+}
+
+// --- ACTUALIZAR PROGRESO ---
 function updateProgress() {
   const total = resultados.Anna + resultados.Tiago;
   if (total === 0) {
     annaProgress.style.width = '50%';
     tiagoProgress.style.width = '50%';
-    scoreText.textContent = 'Aún no hay partidas registradas.';
+    scoreText.textContent = 'Aún no hay partidas.';
     return;
   }
   const annaPct = ((resultados.Anna / total) * 100).toFixed(1);
@@ -221,10 +266,10 @@ function updateProgress() {
 
   annaProgress.style.width = `${annaPct}%`;
   tiagoProgress.style.width = `${tiagoPct}%`;
-
-  scoreText.textContent = `Anna: ${resultados.Anna} (${annaPct}%) — Tiago: ${resultados.Tiago} (${tiagoPct}%)`;
+  scoreText.textContent = `Anna: ${annaPct}% — Tiago: ${tiagoPct}%`;
 }
 
+// --- HISTORIAL ---
 function renderHistory() {
   historyList.innerHTML = '';
   historial.slice().reverse().forEach(item => {
@@ -234,44 +279,43 @@ function renderHistory() {
   });
 }
 
-// ----- GUARDAR PARTIDA -----
-saveBtn.addEventListener('click', () => {
-  const winner = winnerSelect.value;
+// --- GUARDAR PARTIDA ---
+saveBtn.addEventListener('click', async () => {
   const juego = juegoInput.value.trim();
+  const winner = winnerSelect.value;
   if (!juego) return alert('Escribí el nombre del juego 🎲');
   if (!rating) return alert('Seleccioná una calificación ⭐');
   if (!winner) return alert('Seleccioná quién ganó 🏆');
 
   resultados[winner]++;
-  const fecha = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-
+  const fecha = new Date().toLocaleString('es-AR');
   historial.push({ juego, rating, winner, fecha });
-  localStorage.setItem('resultados', JSON.stringify(resultados));
-  localStorage.setItem('historial', JSON.stringify(historial));
+
+  await set(ref(db, "modoTablero/"), { resultados, historial });
 
   updateProgress();
   renderHistory();
+
   juegoInput.value = '';
   winnerSelect.value = '';
   stars.forEach(s => s.classList.remove('active'));
   rating = 0;
 });
 
-// ----- REINICIAR -----
-resetBtn.addEventListener('click', () => {
-  if (confirm('¿Querés reiniciar el marcador y el historial?')) {
+// --- REINICIAR ---
+resetBtn.addEventListener('click', async () => {
+  if (confirm('¿Reiniciar marcador e historial?')) {
     resultados = { Anna: 0, Tiago: 0 };
     historial = [];
-    localStorage.removeItem('resultados');
-    localStorage.removeItem('historial');
+    await set(ref(db, "modoTablero/"), { resultados, historial });
     updateProgress();
     renderHistory();
   }
 });
 
-updateProgress();
-renderHistory();
+cargarDatos();
 
   </script>
+
 </body>
 </html>
