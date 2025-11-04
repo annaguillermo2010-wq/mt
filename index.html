@@ -1,231 +1,184 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎲 Modo Tablero</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Modo Tablero — Guardado en la nube</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
+  <div class="coupon-container" id="couponBox">
     <h1>🎲 Modo Tablero</h1>
 
-    <div class="game-section">
-      <label for="juego">¿Qué juego jugamos?</label>
-      <input type="text" id="juego" placeholder="Ej: Uno, Monopoly..." />
+    <!-- LOGIN / USUARIO -->
+    <label for="user">Usuario (para sincronizar):</label>
+    <div class="user-row">
+      <input id="user" placeholder="ej: anna" />
+      <button id="loginBtn">Entrar</button>
+    </div>
+    <p id="loggedAs" class="muted"></p>
+
+    <label for="tipo">Qué vamos a hacer:</label>
+    <select id="tipo">
+      <option value="peli">Peli 🎬</option>
+      <option value="play">Play 🎮</option>
+      <option value="otro">Otro 💬</option>
+    </select>
+
+    <label for="detalle">Juego / Peli:</label>
+    <input type="text" id="detalle" placeholder="Escribe aquí... 💕">
+
+    <label>Calificación:</label>
+    <div class="stars" id="stars">
+      <span class="star" data-value="1">★</span>
+      <span class="star" data-value="2">★</span>
+      <span class="star" data-value="3">★</span>
+      <span class="star" data-value="4">★</span>
+      <span class="star" data-value="5">★</span>
     </div>
 
-    <div class="rating-section">
-      <label>Calificación del juego:</label>
-      <div class="stars" id="stars">
-        <span data-value="1">⭐</span>
-        <span data-value="2">⭐</span>
-        <span data-value="3">⭐</span>
-        <span data-value="4">⭐</span>
-        <span data-value="5">⭐</span>
-      </div>
+    <label>¿Quién ganó?</label>
+    <div class="winner-row">
+      <button class="winner-btn" data-player="Anna">Anna</button>
+      <button class="winner-btn" data-player="Tiago">Tiago</button>
     </div>
 
-    <div class="winner-section">
-      <label>¿Quién ganó?</label>
-      <select id="winner">
-        <option value="">Seleccionar...</option>
-        <option value="Anna">Anna 🧡</option>
-        <option value="Tiago">Tiago 💙</option>
-      </select>
-      <button id="save">Guardar partida</button>
-    </div>
+    <button id="saveBtn" class="primary">Guardar partida 💖</button>
 
-    <div class="progress-section">
+    <!-- PROGRESS -->
+    <div class="progress-block">
       <div class="score-header">
-        <span>Anna</span>
-        <span>Tiago</span>
+        <span class="left-label">Anna</span>
+        <span class="right-label">Tiago</span>
       </div>
       <div class="progress-bar">
         <div id="anna-progress" class="progress anna"></div>
         <div id="tiago-progress" class="progress tiago"></div>
       </div>
-      <p id="score"></p>
+      <p id="scoreText" class="muted">Sin partidas aún.</p>
     </div>
 
-    <div class="history-section">
-      <h3>📜 Historial de partidas</h3>
-      <ul id="history"></ul>
-      <button id="reset">Reiniciar marcador</button>
+    <div class="history" id="history">
+      <h2>Historial</h2>
+      <div id="historyList"></div>
     </div>
+
+    <button id="resetBtn" class="danger">Reiniciar marcador</button>
   </div>
-
-  <!-- Firebase + JS -->
-
 <style>
-  body {
-  font-family: 'Poppins', sans-serif;
-  background: #f6deff;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
+  :root{
+  --violet: #995cd6;
+  --pinklight: #f6deff;
+  --star-yellow: #ffd86b;
+  --bg: #f6deff;
 }
 
-.container {
-  background: white;
-  padding: 25px;
-  border-radius: 25px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-  width: 90%;
+*{box-sizing:border-box}
+body{
+  font-family: 'Poppins', Arial, sans-serif;
+  background: var(--bg);
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  color:#2d2d3a;
+}
+
+/* Contenedor */
+.coupon-container{
+  width: 100%;
   max-width: 420px;
-  text-align: center;
-  border: 3px solid #995cd6;
+  background: #fff;
+  border-radius: 14px;
+  padding: 20px;
+  border: 3px solid var(--violet);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
 }
 
-h1 {
-  color: #995cd6;
-  margin-bottom: 20px;
-  font-size: 1.8em;
+/* Título */
+h1{ color:var(--violet); text-align:center; margin:0 0 12px; font-size:1.6rem; }
+
+/* Usuario */
+.user-row{ display:flex; gap:8px; margin-bottom:6px; }
+.user-row input{ flex:1; padding:8px 10px; border-radius:8px; border:1.5px solid var(--violet); }
+.user-row button{ padding:8px 12px; border-radius:8px; background:var(--violet); color:#fff; border:none; cursor:pointer; }
+
+/* Labels y inputs */
+label{ display:block; margin-top:10px; font-weight:600; color:#4a2f7a; }
+select, input[type="text"], input#detalle{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1.5px solid #d6bff7;
+  margin-top:6px;
+  font-size:1rem;
 }
 
-label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 5px;
+/* Stars */
+.stars{ display:flex; justify-content:center; gap:8px; margin-top:10px; }
+.star{ font-size:28px; color:#c6d6f2; cursor:pointer; transition: transform .12s ease, color .12s ease, text-shadow .12s; }
+.star:hover{ transform:scale(1.15); }
+.star.selected{
+  color: var(--star-yellow);
+  transform:scale(1.25);
+  text-shadow: 0 0 8px rgba(255,215,0,0.6), 0 0 14px rgba(255,230,140,0.25);
 }
 
-input, select {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1.5px solid #995cd6;
-  margin-bottom: 15px;
-  outline: none;
-  font-size: 1em;
+/* Winner buttons */
+.winner-row{ display:flex; gap:10px; justify-content:center; margin-top:8px; }
+.winner-btn{
+  padding:8px 14px;
+  border-radius:10px;
+  border:2px solid #ddd;
+  cursor:pointer;
+  background:#fff;
+  min-width:110px;
+  font-weight:700;
 }
+.winner-btn.active{ border-color:var(--violet); background:var(--pinklight); }
 
-button {
-  background-color: #995cd6;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 12px;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.3s;
-  width: 100%;
-  max-width: 220px;
-}
+/* Primary / danger */
+button.primary{ margin-top:14px; width:100%; padding:12px; background:var(--violet); color:#fff; border:none; border-radius:10px; font-weight:700; cursor:pointer; }
+button.danger{ margin-top:12px; width:100%; padding:10px; background:#ffdddd; color:#7a2a2a; border:none; border-radius:10px; font-weight:700; cursor:pointer; }
 
-button:hover {
-  background-color: #7d41b3;
-}
+/* Progress */
+.progress-block{ margin-top:18px; }
+.score-header{ display:flex; justify-content:space-between; font-weight:800; color: #5a3a99; margin-bottom:6px; }
+.progress-bar{ height:26px; width:100%; background:#f0f0f0; border-radius:14px; overflow:hidden; display:flex; }
+.progress{ height:100%; transition:width .5s ease; }
+.anna{ background: linear-gradient(90deg, var(--pinklight), #ffd8f7); }
+.tiago{ background: linear-gradient(90deg, #d9c9ff, #bca0ff); }
+#scoreText{ margin-top:8px; text-align:center; font-weight:700; color:#4b2f7a; }
 
-.stars {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 15px;
-}
+/* History */
+.history{ margin-top:18px; background:#fff; border:2px solid #f0e7ff; border-radius:10px; padding:10px; max-height:220px; overflow:auto; }
+.history h2{ text-align:center; margin:0 0 8px; color:var(--violet); font-size:1.05rem; }
+.history-item{ background: #f6f0ff; padding:8px; border-radius:8px; margin-bottom:8px; border-left:4px solid var(--violet); }
+.history-item p{ margin:2px 0; font-size:.95rem; }
+.history-item .date{ font-size:.85rem; color:#5a3a99; font-style:italic; }
 
-.stars span {
-  font-size: 32px;
-  cursor: pointer;
-  color: #bbb;
-  transition: all 0.2s ease;
-}
+/* logged */
+.muted{ font-size:0.9rem; color:#6b5a85; margin-top:6px; text-align:center; }
 
-.stars span.active {
-  color: #ffcc00;
-  text-shadow: 0 0 8px #ffed8a, 0 0 15px #ffe066;
-}
-
-.progress-section {
-  margin-top: 25px;
-}
-
-.score-header {
-  display: flex;
-  justify-content: space-between;
-  font-weight: bold;
-  color: #5a3a99;
-}
-
-.progress-bar {
-  display: flex;
-  width: 100%;
-  height: 25px;
-  background-color: #eee;
-  border-radius: 15px;
-  overflow: hidden;
-  position: relative;
-}
-
-.progress {
-  height: 100%;
-  transition: width 0.5s ease;
-}
-
-.anna {
-  background-color: #f6deff;
-}
-
-.tiago {
-  background-color: #bca0ff;
-}
-
-#score {
-  margin-top: 10px;
-  font-weight: 600;
-  color: #5a3a99;
-}
-
-.history-section {
-  margin-top: 25px;
-  text-align: left;
-}
-
-.history-section h3 {
-  color: #995cd6;
-  text-align: center;
-}
-
-#history {
-  list-style: none;
-  padding: 0;
-  margin-top: 10px;
-  max-height: 180px;
-  overflow-y: auto;
-}
-
-#history li {
-  background: #f6deff;
-  border-left: 4px solid #995cd6;
-  margin-bottom: 8px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-@media (max-width: 600px) {
-  .container {
-    padding: 20px;
-    max-width: 95%;
-  }
-  h1 {
-    font-size: 1.5em;
-  }
-  .stars span {
-    font-size: 28px;
-  }
+/* Responsive */
+@media (max-width:480px){
+  .coupon-container{ padding:16px; }
+  h1{ font-size:1.3rem; }
+  .star{ font-size:26px; }
+  .winner-btn{ min-width:90px; padding:8px; }
 }
 
 
 </style>
 
   <script type="module" src="script.js">
-       // --- CONFIGURAR FIREBASE ---
-// 🔥 Pegá tus datos de Firebase aquí ↓
+ // script.js (module) — guarda por USUARIO en Realtime DB
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
+/* --- PEGAR FIREBASE CONFIG ACA (reemplazá los valores) --- */
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
   authDomain: "TU_DOMINIO.firebaseapp.com",
@@ -235,106 +188,211 @@ const firebaseConfig = {
   messagingSenderId: "TU_SENDER_ID",
   appId: "TU_APP_ID"
 };
+/* --------------------------------------------------------- */
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// --- ELEMENTOS DOM ---
-const stars = document.querySelectorAll('#stars span');
-const juegoInput = document.getElementById('juego');
-const winnerSelect = document.getElementById('winner');
-const saveBtn = document.getElementById('save');
-const resetBtn = document.getElementById('reset');
+/* ----- DOM ----- */
+const userInput = document.getElementById('user');
+const loginBtn = document.getElementById('loginBtn');
+const loggedAs = document.getElementById('loggedAs');
+const tipoSel = document.getElementById('tipo');
+const detalleInput = document.getElementById('detalle');
+const stars = document.querySelectorAll('.star');
+const winnerBtns = document.querySelectorAll('.winner-btn');
+const saveBtn = document.getElementById('saveBtn');
+const resetBtn = document.getElementById('resetBtn');
+
 const annaProgress = document.getElementById('anna-progress');
 const tiagoProgress = document.getElementById('tiago-progress');
-const scoreText = document.getElementById('score');
-const historyList = document.getElementById('history');
+const scoreText = document.getElementById('scoreText');
 
-let rating = 0;
+const historyList = document.getElementById('historyList');
+
+let currentUser = null;
+let selectedRating = 0;
+let selectedWinner = null;
 let resultados = { Anna: 0, Tiago: 0 };
 let historial = [];
 
-// --- ESTRELLAS ---
-stars.forEach(star => {
-  star.addEventListener('click', () => {
-    rating = parseInt(star.dataset.value);
-    stars.forEach(s => s.classList.remove('active'));
-    for (let i = 0; i < rating; i++) stars[i].classList.add('active');
+/* ----- Estrellas (comportamiento igual que tu ejemplo) ----- */
+stars.forEach(s => {
+  s.addEventListener('click', () => {
+    selectedRating = parseInt(s.dataset.value);
+    updateStars(selectedRating);
+  });
+});
+function updateStars(val){
+  stars.forEach(st => {
+    const v = parseInt(st.dataset.value);
+    st.classList.toggle('selected', v <= val);
+  });
+}
+
+/* ----- Winner buttons ----- */
+winnerBtns.forEach(btn => {
+  btn.addEventListener('click', () => {
+    selectedWinner = btn.dataset.player;
+    winnerBtns.forEach(b => b.classList.toggle('active', b === btn));
   });
 });
 
-// --- ACTUALIZAR INTERFAZ ---
-function updateProgress() {
-  const total = resultados.Anna + resultados.Tiago;
+/* ----- Login (selección de usuario) ----- */
+loginBtn.addEventListener('click', async () => {
+  const user = userInput.value.trim();
+  if (!user) return alert('Ingresá un usuario para sincronizar.');
+  currentUser = user;
+  loggedAs.textContent = `Conectado como: ${currentUser}`;
+  await cargarDatosUsuario();
+});
+
+/* ----- Cargar datos desde Firebase para usuario ----- */
+async function cargarDatosUsuario(){
+  if (!currentUser) return;
+  try {
+    const snap = await get(ref(db, `modoTablero/users/${currentUser}`));
+    if (snap.exists()) {
+      const data = snap.val();
+      resultados = data.resultados || {Anna:0,Tiago:0};
+      historial = data.historial || [];
+    } else {
+      // inicializar estructura si no existe
+      resultados = {Anna:0,Tiago:0};
+      historial = [];
+      await set(ref(db, `modoTablero/users/${currentUser}`), { resultados, historial });
+    }
+    actualizarUI();
+  } catch (err) {
+    console.error(err);
+    alert('Error al cargar datos. Revisá tu configuración de Firebase.');
+  }
+}
+
+/* ----- Guardar partida ----- */
+saveBtn.addEventListener('click', async () => {
+  if (!currentUser) return alert('Ingresá tu usuario y clic en Entrar antes de guardar.');
+  const tipo = tipoSel.value;
+  const detalle = detalleInput.value.trim();
+  if (!detalle) return alert('Escribí el nombre del juego/peli.');
+  if (selectedRating === 0) return alert('Seleccioná una calificación.');
+  if (!selectedWinner) return alert('Elegí quién ganó (Anna o Tiago).');
+
+  // actualizar resultados
+  resultados[selectedWinner] = (resultados[selectedWinner] || 0) + 1;
+
+  const fecha = obtenerFechaHora();
+  const partida = { tipo, detalle, calificacion: selectedRating, winner: selectedWinner, fecha };
+
+  historial.push(partida);
+
+  // guardar en firebase
+  try {
+    await set(ref(db, `modoTablero/users/${currentUser}`), { resultados, historial });
+  } catch (err) {
+    console.error(err);
+    alert('Error al guardar en la nube.');
+    return;
+  }
+
+  // limpiar formulario
+  detalleInput.value = '';
+  selectedRating = 0;
+  selectedWinner = null;
+  updateStars(0);
+  winnerBtns.forEach(b => b.classList.remove('active'));
+
+  // actualizar UI
+  actualizarUI();
+});
+
+/* ----- Reiniciar marcador e historial ----- */
+resetBtn.addEventListener('click', async () => {
+  if (!currentUser) return alert('Ingresá tu usuario y clic en Entrar.');
+  if (!confirm('¿Reiniciar marcador e historial para este usuario?')) return;
+  resultados = {Anna:0,Tiago:0};
+  historial = [];
+  try {
+    await set(ref(db, `modoTablero/users/${currentUser}`), { resultados, historial });
+    actualizarUI();
+  } catch (err) {
+    console.error(err);
+    alert('Error al reiniciar.');
+  }
+});
+
+/* ----- UI update ----- */
+function actualizarUI(){
+  // progress
+  const total = (resultados.Anna||0) + (resultados.Tiago||0);
   if (total === 0) {
     annaProgress.style.width = '50%';
     tiagoProgress.style.width = '50%';
-    scoreText.textContent = 'Aún no hay partidas.';
-    return;
+    scoreText.textContent = 'Sin partidas aún.';
+  } else {
+    const aPct = ((resultados.Anna / total) * 100).toFixed(1);
+    const tPct = ((resultados.Tiago / total) * 100).toFixed(1);
+    annaProgress.style.width = `${aPct}%`;
+    tiagoProgress.style.width = `${tPct}%`;
+    scoreText.textContent = `Anna: ${aPct}% — Tiago: ${tPct}% (Anna ${resultados.Anna} / Tiago ${resultados.Tiago})`;
   }
-  const annaPct = ((resultados.Anna / total) * 100).toFixed(1);
-  const tiagoPct = ((resultados.Tiago / total) * 100).toFixed(1);
-  annaProgress.style.width = `${annaPct}%`;
-  tiagoProgress.style.width = `${tiagoPct}%`;
-  scoreText.textContent = `Anna: ${annaPct}% — Tiago: ${tiagoPct}%`;
+
+  // history render
+  renderHistory();
 }
 
-function renderHistory() {
+/* ----- Render historial ----- */
+function renderHistory(){
   historyList.innerHTML = '';
-  historial.slice().reverse().forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = `🎮 ${item.juego} | ⭐${item.rating} | 🏆 ${item.winner} | ${item.fecha}`;
-    historyList.appendChild(li);
+  if (!historial || historial.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'history-empty muted';
+    empty.textContent = 'Aún no hay partidas guardadas.';
+    historyList.appendChild(empty);
+    return;
+  }
+  // mostrar más reciente primero
+  const arr = historial.slice().reverse();
+  arr.forEach(item => {
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    const starsTxt = '★'.repeat(item.calificacion) + '☆'.repeat(5 - item.calificacion);
+    div.innerHTML = `
+      <p><strong>${escapeHtml(item.tipo.toUpperCase())}:</strong> ${escapeHtml(item.detalle)}</p>
+      <p><strong>Calificación:</strong> <span style="color:${'#ffd700'}">${starsTxt}</span> — <strong>Ganador:</strong> ${escapeHtml(item.winner)}</p>
+      <p class="date">${escapeHtml(item.fecha)}</p>
+    `;
+    historyList.appendChild(div);
   });
 }
 
-// --- CARGAR DATOS DESDE FIREBASE ---
-async function cargarDatos() {
-  const snapshot = await get(ref(db, "modoTablero/"));
-  if (snapshot.exists()) {
-    const data = snapshot.val();
-    resultados = data.resultados || { Anna: 0, Tiago: 0 };
-    historial = data.historial || [];
-  }
-  updateProgress();
-  renderHistory();
+/* ----- Helpers ----- */
+function obtenerFechaHora(){
+  const d = new Date();
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2,'0');
+  const min = String(d.getMinutes()).padStart(2,'0');
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
 }
 
-// --- GUARDAR PARTIDA ---
-saveBtn.addEventListener('click', async () => {
-  const juego = juegoInput.value.trim();
-  const winner = winnerSelect.value;
-  if (!juego) return alert('Escribí el nombre del juego 🎲');
-  if (!rating) return alert('Seleccioná una calificación ⭐');
-  if (!winner) return alert('Seleccioná quién ganó 🏆');
+function escapeHtml(str){
+  if (!str) return '';
+  return str.replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
 
-  resultados[winner]++;
-  const fecha = new Date().toLocaleString('es-AR');
-  historial.push({ juego, rating, winner, fecha });
+/* ----- Auto-load if user in localStorage ----- */
+const savedUser = localStorage.getItem('modoTablero_user');
+if (savedUser){
+  userInput.value = savedUser;
+  loginBtn.click();
+}
 
-  await set(ref(db, "modoTablero/"), { resultados, historial });
-
-  updateProgress();
-  renderHistory();
-
-  juegoInput.value = '';
-  winnerSelect.value = '';
-  stars.forEach(s => s.classList.remove('active'));
-  rating = 0;
+/* ----- Save username to localStorage when logging in ----- */
+loginBtn.addEventListener('click', () => {
+  if (userInput.value.trim()) localStorage.setItem('modoTablero_user', userInput.value.trim());
 });
-
-// --- REINICIAR ---
-resetBtn.addEventListener('click', async () => {
-  if (confirm('¿Reiniciar marcador e historial?')) {
-    resultados = { Anna: 0, Tiago: 0 };
-    historial = [];
-    await set(ref(db, "modoTablero/"), { resultados, historial });
-    updateProgress();
-    renderHistory();
-  }
-});
-
-cargarDatos();
 
 
   </script>
