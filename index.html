@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🎲 Modo Tablero</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>🎲 Modo Tablero</h1>
+
+    <div class="game-section">
+      <label for="juego">¿Qué juego jugamos?</label>
+      <input type="text" id="juego" placeholder="Ej: Uno, Monopoly..." />
+    </div>
+
+    <div class="rating-section">
+      <label>Calificación del juego:</label>
+      <div class="stars" id="stars">
+        <span data-value="1">⭐</span>
+        <span data-value="2">⭐</span>
+        <span data-value="3">⭐</span>
+        <span data-value="4">⭐</span>
+        <span data-value="5">⭐</span>
+      </div>
+    </div>
+
+    <div class="winner-section">
+      <label>¿Quién ganó?</label>
+      <select id="winner">
+        <option value="">Seleccionar...</option>
+        <option value="Anna">Anna 🧡</option>
+        <option value="Tiago">Tiago 💙</option>
+      </select>
+      <button id="save">Guardar partida</button>
+    </div>
+
+    <div class="progress-section">
+      <h3>Marcador total</h3>
+      <div class="progress-bar">
+        <div id="anna-progress" class="progress anna"></div>
+        <div id="tiago-progress" class="progress tiago"></div>
+      </div>
+      <p id="score"></p>
+    </div>
+  </div>
+  <style>
+    body {
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #fef6e4, #e8f0fe);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.container {
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 20px;
+  color: #333;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+}
+
+input, select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 15px;
+}
+
+button {
+  background-color: #ffb84d;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #ffa31a;
+}
+
+.stars span {
+  font-size: 25px;
+  cursor: pointer;
+  color: #ccc;
+}
+
+.stars span.active {
+  color: gold;
+}
+
+.progress-section {
+  margin-top: 20px;
+}
+
+.progress-bar {
+  position: relative;
+  width: 100%;
+  height: 25px;
+  background-color: #eee;
+  border-radius: 15px;
+  overflow: hidden;
+  display: flex;
+}
+
+.progress {
+  height: 100%;
+  transition: width 0.5s ease;
+}
+
+.anna {
+  background-color: #ff9aa2;
+}
+
+.tiago {
+  background-color: #9abaff;
+}
+
+#score {
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+  </style>
+
+  <script src="script.js">
+const stars = document.querySelectorAll('#stars span');
+let rating = 0;
+
+stars.forEach(star => {
+  star.addEventListener('click', () => {
+    rating = star.dataset.value;
+    stars.forEach(s => s.classList.remove('active'));
+    for (let i = 0; i < rating; i++) stars[i].classList.add('active');
+  });
+});
+
+const saveBtn = document.getElementById('save');
+const winnerSelect = document.getElementById('winner');
+const annaProgress = document.getElementById('anna-progress');
+const tiagoProgress = document.getElementById('tiago-progress');
+const scoreText = document.getElementById('score');
+
+let results = JSON.parse(localStorage.getItem('resultados')) || { Anna: 0, Tiago: 0 };
+
+function updateProgress() {
+  const total = results.Anna + results.Tiago;
+  if (total === 0) {
+    annaProgress.style.width = '50%';
+    tiagoProgress.style.width = '50%';
+    scoreText.textContent = 'Aún no hay partidas registradas.';
+    return;
+  }
+
+  const annaPct = ((results.Anna / total) * 100).toFixed(1);
+  const tiagoPct = ((results.Tiago / total) * 100).toFixed(1);
+
+  annaProgress.style.width = `${annaPct}%`;
+  tiagoProgress.style.width = `${tiagoPct}%`;
+
+  scoreText.textContent = `Anna: ${results.Anna} (${annaPct}%) — Tiago: ${results.Tiago} (${tiagoPct}%)`;
+}
+
+saveBtn.addEventListener('click', () => {
+  const winner = winnerSelect.value;
+  if (!winner) return alert('Seleccioná quién ganó 🏆');
+
+  results[winner]++;
+  localStorage.setItem('resultados', JSON.stringify(results));
+
+  updateProgress();
+  alert('Partida guardada ✅');
+});
+
+updateProgress();
+
+  </script>
+</body>
+</html>
