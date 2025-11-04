@@ -55,7 +55,8 @@
     </div>
   </div>
 
-  <!-- Firebase -->
+  <!-- Firebase + JS -->
+
 <style>
   body {
   font-family: 'Poppins', sans-serif;
@@ -70,7 +71,7 @@
 
 .container {
   background: white;
-  padding: 30px;
+  padding: 25px;
   border-radius: 25px;
   box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   width: 90%;
@@ -82,6 +83,7 @@
 h1 {
   color: #995cd6;
   margin-bottom: 20px;
+  font-size: 1.8em;
 }
 
 label {
@@ -97,6 +99,7 @@ input, select {
   border: 1.5px solid #995cd6;
   margin-bottom: 15px;
   outline: none;
+  font-size: 1em;
 }
 
 button {
@@ -108,14 +111,22 @@ button {
   font-weight: bold;
   cursor: pointer;
   transition: 0.3s;
+  width: 100%;
+  max-width: 220px;
 }
 
 button:hover {
   background-color: #7d41b3;
 }
 
+.stars {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
 .stars span {
-  font-size: 30px;
+  font-size: 32px;
   cursor: pointer;
   color: #bbb;
   transition: all 0.2s ease;
@@ -123,7 +134,7 @@ button:hover {
 
 .stars span.active {
   color: #ffcc00;
-  text-shadow: 0 0 10px #ffd966;
+  text-shadow: 0 0 8px #ffed8a, 0 0 15px #ffe066;
 }
 
 .progress-section {
@@ -133,7 +144,6 @@ button:hover {
 .score-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 5px;
   font-weight: bold;
   color: #5a3a99;
 }
@@ -194,13 +204,27 @@ button:hover {
   font-size: 14px;
 }
 
+@media (max-width: 600px) {
+  .container {
+    padding: 20px;
+    max-width: 95%;
+  }
+  h1 {
+    font-size: 1.5em;
+  }
+  .stars span {
+    font-size: 28px;
+  }
+}
+
+
 </style>
 
   <script type="module" src="script.js">
-        // --- CONFIGURAR FIREBASE ---
-// (Cambiá los valores por los tuyos desde tu panel de Firebase)
+       // --- CONFIGURAR FIREBASE ---
+// 🔥 Pegá tus datos de Firebase aquí ↓
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-import { getDatabase, ref, push, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+import { getDatabase, ref, get, set } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
@@ -212,7 +236,6 @@ const firebaseConfig = {
   appId: "TU_APP_ID"
 };
 
-// Inicializar Firebase
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -231,7 +254,7 @@ let rating = 0;
 let resultados = { Anna: 0, Tiago: 0 };
 let historial = [];
 
-// --- ESTRELLAS INTERACTIVAS ---
+// --- ESTRELLAS ---
 stars.forEach(star => {
   star.addEventListener('click', () => {
     rating = parseInt(star.dataset.value);
@@ -239,6 +262,31 @@ stars.forEach(star => {
     for (let i = 0; i < rating; i++) stars[i].classList.add('active');
   });
 });
+
+// --- ACTUALIZAR INTERFAZ ---
+function updateProgress() {
+  const total = resultados.Anna + resultados.Tiago;
+  if (total === 0) {
+    annaProgress.style.width = '50%';
+    tiagoProgress.style.width = '50%';
+    scoreText.textContent = 'Aún no hay partidas.';
+    return;
+  }
+  const annaPct = ((resultados.Anna / total) * 100).toFixed(1);
+  const tiagoPct = ((resultados.Tiago / total) * 100).toFixed(1);
+  annaProgress.style.width = `${annaPct}%`;
+  tiagoProgress.style.width = `${tiagoPct}%`;
+  scoreText.textContent = `Anna: ${annaPct}% — Tiago: ${tiagoPct}%`;
+}
+
+function renderHistory() {
+  historyList.innerHTML = '';
+  historial.slice().reverse().forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = `🎮 ${item.juego} | ⭐${item.rating} | 🏆 ${item.winner} | ${item.fecha}`;
+    historyList.appendChild(li);
+  });
+}
 
 // --- CARGAR DATOS DESDE FIREBASE ---
 async function cargarDatos() {
@@ -250,33 +298,6 @@ async function cargarDatos() {
   }
   updateProgress();
   renderHistory();
-}
-
-// --- ACTUALIZAR PROGRESO ---
-function updateProgress() {
-  const total = resultados.Anna + resultados.Tiago;
-  if (total === 0) {
-    annaProgress.style.width = '50%';
-    tiagoProgress.style.width = '50%';
-    scoreText.textContent = 'Aún no hay partidas.';
-    return;
-  }
-  const annaPct = ((resultados.Anna / total) * 100).toFixed(1);
-  const tiagoPct = ((resultados.Tiago / total) * 100).toFixed(1);
-
-  annaProgress.style.width = `${annaPct}%`;
-  tiagoProgress.style.width = `${tiagoPct}%`;
-  scoreText.textContent = `Anna: ${annaPct}% — Tiago: ${tiagoPct}%`;
-}
-
-// --- HISTORIAL ---
-function renderHistory() {
-  historyList.innerHTML = '';
-  historial.slice().reverse().forEach(item => {
-    const li = document.createElement('li');
-    li.textContent = `🎮 ${item.juego} | ⭐${item.rating} | 🏆 ${item.winner} | ${item.fecha}`;
-    historyList.appendChild(li);
-  });
 }
 
 // --- GUARDAR PARTIDA ---
@@ -314,6 +335,7 @@ resetBtn.addEventListener('click', async () => {
 });
 
 cargarDatos();
+
 
   </script>
 
