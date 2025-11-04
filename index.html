@@ -44,71 +44,80 @@
       </div>
       <p id="score"></p>
     </div>
+
+    <div class="history-section">
+      <h3>📜 Historial de partidas</h3>
+      <ul id="history"></ul>
+      <button id="reset">Reiniciar marcador</button>
+    </div>
   </div>
-  <style>
-    body {
+<style>
+  body {
   font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #fef6e4, #e8f0fe);
+  background: #f6deff;
   margin: 0;
   padding: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 .container {
   background: white;
-  padding: 25px;
-  border-radius: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  padding: 30px;
+  border-radius: 25px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
   width: 90%;
-  max-width: 400px;
+  max-width: 420px;
   text-align: center;
+  border: 3px solid #995cd6;
 }
 
 h1 {
+  color: #995cd6;
   margin-bottom: 20px;
-  color: #333;
 }
 
 label {
   display: block;
-  margin-bottom: 5px;
   font-weight: 600;
+  margin-bottom: 5px;
 }
 
 input, select {
   width: 100%;
   padding: 10px;
   border-radius: 10px;
-  border: 1px solid #ccc;
+  border: 1.5px solid #995cd6;
   margin-bottom: 15px;
+  outline: none;
 }
 
 button {
-  background-color: #ffb84d;
+  background-color: #995cd6;
   border: none;
   padding: 10px 20px;
   border-radius: 12px;
-  color: #fff;
+  color: white;
   font-weight: bold;
   cursor: pointer;
   transition: 0.3s;
 }
 
 button:hover {
-  background-color: #ffa31a;
+  background-color: #7d41b3;
 }
 
 .stars span {
-  font-size: 25px;
+  font-size: 28px;
   cursor: pointer;
   color: #ccc;
+  transition: 0.3s;
 }
 
 .stars span.active {
-  color: gold;
+  color: #995cd6;
 }
 
 .progress-section {
@@ -116,13 +125,13 @@ button:hover {
 }
 
 .progress-bar {
-  position: relative;
+  display: flex;
   width: 100%;
   height: 25px;
   background-color: #eee;
   border-radius: 15px;
   overflow: hidden;
-  display: flex;
+  margin-top: 10px;
 }
 
 .progress {
@@ -131,24 +140,66 @@ button:hover {
 }
 
 .anna {
-  background-color: #ff9aa2;
+  background-color: #f6deff;
 }
 
 .tiago {
-  background-color: #9abaff;
+  background-color: #bca0ff;
 }
 
 #score {
   margin-top: 10px;
   font-weight: 600;
+  color: #5a3a99;
+}
+
+.history-section {
+  margin-top: 25px;
+  text-align: left;
+}
+
+.history-section h3 {
+  color: #995cd6;
+  text-align: center;
+}
+
+#history {
+  list-style: none;
+  padding: 0;
+  margin-top: 10px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+#history li {
+  background: #f6deff;
+  border-left: 4px solid #995cd6;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  font-size: 14px;
 }
 
   </style>
 
   <script src="script.js">
+// ----- VARIABLES -----
 const stars = document.querySelectorAll('#stars span');
 let rating = 0;
+const saveBtn = document.getElementById('save');
+const winnerSelect = document.getElementById('winner');
+const annaProgress = document.getElementById('anna-progress');
+const tiagoProgress = document.getElementById('tiago-progress');
+const scoreText = document.getElementById('score');
+const historyList = document.getElementById('history');
+const resetBtn = document.getElementById('reset');
+const juegoInput = document.getElementById('juego');
 
+// ----- GUARDADO LOCAL (puede conectarse luego a Firebase) -----
+let resultados = JSON.parse(localStorage.getItem('resultados')) || { Anna: 0, Tiago: 0 };
+let historial = JSON.parse(localStorage.getItem('historial')) || [];
+
+// ----- FUNCIONES -----
 stars.forEach(star => {
   star.addEventListener('click', () => {
     rating = star.dataset.value;
@@ -157,44 +208,69 @@ stars.forEach(star => {
   });
 });
 
-const saveBtn = document.getElementById('save');
-const winnerSelect = document.getElementById('winner');
-const annaProgress = document.getElementById('anna-progress');
-const tiagoProgress = document.getElementById('tiago-progress');
-const scoreText = document.getElementById('score');
-
-let results = JSON.parse(localStorage.getItem('resultados')) || { Anna: 0, Tiago: 0 };
-
 function updateProgress() {
-  const total = results.Anna + results.Tiago;
+  const total = resultados.Anna + resultados.Tiago;
   if (total === 0) {
     annaProgress.style.width = '50%';
     tiagoProgress.style.width = '50%';
     scoreText.textContent = 'Aún no hay partidas registradas.';
     return;
   }
-
-  const annaPct = ((results.Anna / total) * 100).toFixed(1);
-  const tiagoPct = ((results.Tiago / total) * 100).toFixed(1);
+  const annaPct = ((resultados.Anna / total) * 100).toFixed(1);
+  const tiagoPct = ((resultados.Tiago / total) * 100).toFixed(1);
 
   annaProgress.style.width = `${annaPct}%`;
   tiagoProgress.style.width = `${tiagoPct}%`;
 
-  scoreText.textContent = `Anna: ${results.Anna} (${annaPct}%) — Tiago: ${results.Tiago} (${tiagoPct}%)`;
+  scoreText.textContent = `Anna: ${resultados.Anna} (${annaPct}%) — Tiago: ${resultados.Tiago} (${tiagoPct}%)`;
 }
 
+function renderHistory() {
+  historyList.innerHTML = '';
+  historial.slice().reverse().forEach(item => {
+    const li = document.createElement('li');
+    li.textContent = `🎮 ${item.juego} | ⭐${item.rating} | 🏆 ${item.winner} | ${item.fecha}`;
+    historyList.appendChild(li);
+  });
+}
+
+// ----- GUARDAR PARTIDA -----
 saveBtn.addEventListener('click', () => {
   const winner = winnerSelect.value;
+  const juego = juegoInput.value.trim();
+  if (!juego) return alert('Escribí el nombre del juego 🎲');
+  if (!rating) return alert('Seleccioná una calificación ⭐');
   if (!winner) return alert('Seleccioná quién ganó 🏆');
 
-  results[winner]++;
-  localStorage.setItem('resultados', JSON.stringify(results));
+  resultados[winner]++;
+  const fecha = new Date().toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+  historial.push({ juego, rating, winner, fecha });
+  localStorage.setItem('resultados', JSON.stringify(resultados));
+  localStorage.setItem('historial', JSON.stringify(historial));
 
   updateProgress();
-  alert('Partida guardada ✅');
+  renderHistory();
+  juegoInput.value = '';
+  winnerSelect.value = '';
+  stars.forEach(s => s.classList.remove('active'));
+  rating = 0;
+});
+
+// ----- REINICIAR -----
+resetBtn.addEventListener('click', () => {
+  if (confirm('¿Querés reiniciar el marcador y el historial?')) {
+    resultados = { Anna: 0, Tiago: 0 };
+    historial = [];
+    localStorage.removeItem('resultados');
+    localStorage.removeItem('historial');
+    updateProgress();
+    renderHistory();
+  }
 });
 
 updateProgress();
+renderHistory();
 
   </script>
 </body>
