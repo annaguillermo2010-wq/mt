@@ -39,21 +39,21 @@
 
     <div class="scoreboard">
       <h2>Marcador</h2>
-      <div class="score-wrapper">
-        <div class="score-side">
-          <p>Anna</p>
-          <p id="annaPct">0%</p>
+      <div class="score-display">
+        <div class="score-item anna">
+          <p class="name">Anna</p>
+          <p id="annaPercent" class="percent">0%</p>
         </div>
-        <div class="bar">
-          <div id="annaBar" class="bar-segment anna"></div>
-          <div id="tiagoBar" class="bar-segment tiago"></div>
+        <div class="progress-container">
+          <div id="annaBar" class="progress anna"></div>
+          <div id="tiagoBar" class="progress tiago"></div>
         </div>
-        <div class="score-side">
-          <p>Tiago</p>
-          <p id="tiagoPct">0%</p>
+        <div class="score-item tiago">
+          <p class="name">Tiago</p>
+          <p id="tiagoPercent" class="percent">0%</p>
         </div>
       </div>
-      <p id="scoreText" class="totalText">(0 partidas)</p>
+      <p id="scoreText">Anna 0% — Tiago 0%</p>
     </div>
 
     <div class="history">
@@ -136,55 +136,61 @@
     transform: scale(1.1);
   }
 
-  /* 🎯 Nuevo estilo del marcador */
+  /* 🎯 Nuevo diseño del marcador */
   .scoreboard {
-    margin-top: 25px;
+    margin-top: 30px;
     text-align: center;
   }
 
-  .score-wrapper {
+  .score-display {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
+    margin-bottom: 10px;
   }
 
-  .score-side {
-    width: 50px;
+  .score-item {
+    width: 60px;
     text-align: center;
   }
 
-  .score-side p:first-child {
+  .score-item .name {
     font-weight: bold;
     color: #995cd6;
+    margin-bottom: 5px;
   }
 
-  .bar {
+  .score-item .percent {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .progress-container {
     flex-grow: 1;
-    display: flex;
-    height: 25px;
-    border-radius: 15px;
+    height: 20px;
+    border-radius: 10px;
     overflow: hidden;
+    background-color: #eee;
+    margin: 0 10px;
+    position: relative;
     border: 2px solid #995cd6;
   }
 
-  .bar-segment {
+  .progress {
     height: 100%;
+    position: absolute;
+    top: 0;
     transition: width 0.5s ease;
   }
 
-  .anna {
-    background-color: #995cd6;
+  .progress.anna {
+    left: 0;
+    background: linear-gradient(90deg, #995cd6, #b68ff0);
   }
 
-  .tiago {
-    background-color: #f6deff;
-  }
-
-  .totalText {
-    font-size: 14px;
-    margin-top: 8px;
-    color: #6b3fa5;
+  .progress.tiago {
+    right: 0;
+    background: linear-gradient(90deg, #f6deff, #e3baff);
   }
 
   .history ul {
@@ -214,8 +220,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const historyList = document.getElementById("historyList");
   const annaBar = document.getElementById("annaBar");
   const tiagoBar = document.getElementById("tiagoBar");
-  const annaPctText = document.getElementById("annaPct");
-  const tiagoPctText = document.getElementById("tiagoPct");
+  const annaPercent = document.getElementById("annaPercent");
+  const tiagoPercent = document.getElementById("tiagoPercent");
   const scoreText = document.getElementById("scoreText");
 
   let selectedRating = 0;
@@ -234,7 +240,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // 🔄 Cargar historial
   function loadHistory() {
     return JSON.parse(localStorage.getItem("partidas")) || [];
   }
@@ -243,7 +248,6 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("partidas", JSON.stringify(partidas));
   }
 
-  // 🧮 Actualizar marcador
   function renderHistory() {
     const partidas = loadHistory();
     historyList.innerHTML = "";
@@ -262,12 +266,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     annaBar.style.width = annaPct + "%";
     tiagoBar.style.width = tiagoPct + "%";
-    annaPctText.textContent = annaPct + "%";
-    tiagoPctText.textContent = tiagoPct + "%";
-    scoreText.textContent = `(${total} partidas registradas)`;
+    annaPercent.textContent = annaPct + "%";
+    tiagoPercent.textContent = tiagoPct + "%";
+    scoreText.textContent = `Anna ${annaPct}% — Tiago ${tiagoPct}% (${total} partidas)`;
   }
 
-  // 💾 Guardar partida
   saveBtn.addEventListener("click", () => {
     const juego = document.getElementById("game").value.trim();
     const ganador = document.getElementById("winner").value;
