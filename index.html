@@ -21,7 +21,7 @@
       background-color: #fff;
       border: 3px solid #995cd6;
       border-radius: 16px;
-      box-shadow: 0 6px 12px rgba(153, 92, 214, 0.2);
+      box-shadow: 0 6px 12px rgba(153, 92, 214, 0.25);
       padding: 25px;
       width: 90%;
       max-width: 400px;
@@ -51,6 +51,7 @@
       box-sizing: border-box;
     }
 
+    /* ⭐ Estrellas */
     .stars {
       display: flex;
       justify-content: center;
@@ -91,8 +92,16 @@
       box-shadow: 0 3px 8px rgba(127, 74, 188, 0.3);
     }
 
+    /* 📊 Barra de progreso */
     .progress {
       margin-top: 25px;
+    }
+
+    .score-labels {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: 3px;
     }
 
     .bar-container {
@@ -102,6 +111,7 @@
       overflow: hidden;
       border: 2px solid #995cd6;
       display: flex;
+      position: relative;
     }
 
     .bar {
@@ -110,13 +120,16 @@
       transition: width 0.5s ease;
     }
 
-    .score-labels {
+    .percent {
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-top: 5px;
+      color: #6d4e99;
       display: flex;
       justify-content: space-between;
-      font-weight: 600;
-      margin-top: 5px;
     }
 
+    /* 🧾 Historial */
     .history {
       margin-top: 30px;
       background-color: #fef9ff;
@@ -185,6 +198,7 @@
 
     <button id="guardarBtn">Guardar partida 🎯</button>
 
+    <!-- Marcador -->
     <div class="progress">
       <div class="score-labels">
         <span>Anna</span><span>Tiago</span>
@@ -192,8 +206,13 @@
       <div class="bar-container">
         <div id="bar" class="bar" style="width: 50%"></div>
       </div>
+      <div class="percent">
+        <span id="annaPorc">50%</span>
+        <span id="tiagoPorc">50%</span>
+      </div>
     </div>
 
+    <!-- Historial -->
     <div class="history" id="historial">
       <h3>Historial</h3>
     </div>
@@ -202,7 +221,7 @@
   <script>
     let calificacionSeleccionada = 0;
 
-    // ⭐ Control de las estrellas
+    // ⭐ Control de estrellas
     document.querySelectorAll('.star').forEach(star => {
       star.addEventListener('click', function() {
         calificacionSeleccionada = parseInt(this.getAttribute('data-value'));
@@ -216,13 +235,11 @@
       });
     }
 
-    // 📅 Fecha actual
     function obtenerFecha() {
       const d = new Date();
       return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
     }
 
-    // 💾 Guardar partida
     document.getElementById('guardarBtn').addEventListener('click', () => {
       const juego = document.getElementById('juego').value.trim();
       const ganador = document.getElementById('ganador').value;
@@ -243,7 +260,6 @@
       partidas.push(partida);
       localStorage.setItem('partidas', JSON.stringify(partidas));
 
-      // limpiar
       document.getElementById('juego').value = '';
       document.getElementById('ganador').value = '';
       calificacionSeleccionada = 0;
@@ -253,7 +269,6 @@
       actualizarBarra();
     });
 
-    // 📜 Mostrar historial
     function mostrarHistorial() {
       const partidas = JSON.parse(localStorage.getItem('partidas')) || [];
       const cont = document.getElementById('historial');
@@ -264,23 +279,26 @@
         div.classList.add('history-item');
         const estrellas = '★'.repeat(p.calificacion) + '☆'.repeat(5 - p.calificacion);
         div.innerHTML = `
-          <p><strong>${p.juego}</strong></p>
-          <p>Ganó: <strong>${p.ganador}</strong></p>
-          <p>Calificación: <span style="color:#ffd86b">${estrellas}</span></p>
+          <p><strong>Juego:</strong> ${p.juego}</p>
+          <p><strong>Ganó:</strong> ${p.ganador}</p>
+          <p><strong>Calificación:</strong> <span style="color:#ffd86b">${estrellas}</span></p>
           <p style="font-size:0.85em; color:#6d4e99;">${p.fecha}</p>
         `;
         cont.appendChild(div);
       });
     }
 
-    // 📊 Actualizar barra
     function actualizarBarra() {
       const partidas = JSON.parse(localStorage.getItem('partidas')) || [];
       const annaWins = partidas.filter(p => p.ganador === 'Anna').length;
       const tiagoWins = partidas.filter(p => p.ganador === 'Tiago').length;
       const total = annaWins + tiagoWins;
-      const annaPorc = total === 0 ? 50 : (annaWins / total) * 100;
+      const annaPorc = total === 0 ? 50 : Math.round((annaWins / total) * 100);
+      const tiagoPorc = total === 0 ? 50 : 100 - annaPorc;
+
       document.getElementById('bar').style.width = `${annaPorc}%`;
+      document.getElementById('annaPorc').innerText = `${annaPorc}%`;
+      document.getElementById('tiagoPorc').innerText = `${tiagoPorc}%`;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
