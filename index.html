@@ -15,7 +15,7 @@
       <input type="text" id="game" placeholder="Ej: UNO, Damas, Jenga..." />
     </div>
 
-    <div class="input-group">
+    <div class="input-group stars-center">
       <label>Calificación:</label>
       <div class="stars" id="stars">
         <span data-value="1">★</span>
@@ -38,26 +38,16 @@
     <button id="saveBtn">Guardar Partida</button>
 
     <div class="scoreboard">
-      <h2>Marcador</h2>
-      <div class="score-display">
-        <div class="score-item anna">
-          <p class="name">Anna</p>
-          <p id="annaPercent" class="percent">0%</p>
-        </div>
-        <div class="progress-container">
-          <div id="annaBar" class="progress anna"></div>
-          <div id="tiagoBar" class="progress tiago"></div>
-        </div>
-        <div class="score-item tiago">
-          <p class="name">Tiago</p>
-          <p id="tiagoPercent" class="percent">0%</p>
-        </div>
+      <h2>📊 Marcador</h2>
+      <div class="new-bar">
+        <div id="annaBar" class="bar-fill anna"></div>
+        <div id="tiagoBar" class="bar-fill tiago"></div>
       </div>
       <p id="scoreText">Anna 0% — Tiago 0%</p>
     </div>
 
     <div class="history">
-      <h2>Historial de Partidas</h2>
+      <h2>📜 Historial de Partidas</h2>
       <ul id="historyList"></ul>
     </div>
   </div>
@@ -92,6 +82,10 @@
     margin-bottom: 20px;
   }
 
+  .stars-center {
+    text-align: center;
+  }
+
   label {
     font-weight: bold;
     display: block;
@@ -120,6 +114,7 @@
 
   .stars {
     display: flex;
+    justify-content: center;
     gap: 5px;
     font-size: 28px;
   }
@@ -136,61 +131,28 @@
     transform: scale(1.1);
   }
 
-  /* 🎯 Nuevo diseño del marcador */
-  .scoreboard {
-    margin-top: 30px;
-    text-align: center;
-  }
-
-  .score-display {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 10px;
-  }
-
-  .score-item {
-    width: 60px;
-    text-align: center;
-  }
-
-  .score-item .name {
-    font-weight: bold;
-    color: #995cd6;
-    margin-bottom: 5px;
-  }
-
-  .score-item .percent {
-    font-size: 18px;
-    font-weight: bold;
-  }
-
-  .progress-container {
-    flex-grow: 1;
-    height: 20px;
-    border-radius: 10px;
-    overflow: hidden;
-    background-color: #eee;
-    margin: 0 10px;
+  /* 🎯 Nuevo estilo del marcador */
+  .new-bar {
     position: relative;
+    height: 28px;
+    background: #f2e6ff;
+    border-radius: 15px;
+    overflow: hidden;
     border: 2px solid #995cd6;
+    display: flex;
   }
 
-  .progress {
+  .bar-fill {
     height: 100%;
-    position: absolute;
-    top: 0;
     transition: width 0.5s ease;
   }
 
-  .progress.anna {
-    left: 0;
-    background: linear-gradient(90deg, #995cd6, #b68ff0);
+  .anna {
+    background: linear-gradient(90deg, #995cd6, #c89bff);
   }
 
-  .progress.tiago {
-    right: 0;
-    background: linear-gradient(90deg, #f6deff, #e3baff);
+  .tiago {
+    background: linear-gradient(90deg, #f6deff, #eac7ff);
   }
 
   .history ul {
@@ -220,8 +182,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const historyList = document.getElementById("historyList");
   const annaBar = document.getElementById("annaBar");
   const tiagoBar = document.getElementById("tiagoBar");
-  const annaPercent = document.getElementById("annaPercent");
-  const tiagoPercent = document.getElementById("tiagoPercent");
   const scoreText = document.getElementById("scoreText");
 
   let selectedRating = 0;
@@ -240,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // 🔄 Cargar historial desde localStorage
   function loadHistory() {
     return JSON.parse(localStorage.getItem("partidas")) || [];
   }
@@ -248,6 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("partidas", JSON.stringify(partidas));
   }
 
+  // 🧮 Actualizar marcador
   function renderHistory() {
     const partidas = loadHistory();
     historyList.innerHTML = "";
@@ -266,11 +228,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     annaBar.style.width = annaPct + "%";
     tiagoBar.style.width = tiagoPct + "%";
-    annaPercent.textContent = annaPct + "%";
-    tiagoPercent.textContent = tiagoPct + "%";
     scoreText.textContent = `Anna ${annaPct}% — Tiago ${tiagoPct}% (${total} partidas)`;
   }
 
+  // 💾 Guardar nueva partida
   saveBtn.addEventListener("click", () => {
     const juego = document.getElementById("game").value.trim();
     const ganador = document.getElementById("winner").value;
@@ -291,6 +252,7 @@ document.addEventListener("DOMContentLoaded", () => {
     saveHistory(partidas);
     renderHistory();
 
+    // Reiniciar campos
     document.getElementById("game").value = "";
     selectedRating = 0;
     stars.forEach(s => s.classList.remove("active"));
