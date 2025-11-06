@@ -10,9 +10,8 @@
       background-color: #f6deff;
       color: #3b2a57;
       display: flex;
-      flex-direction: column;
+      justify-content: center;
       align-items: center;
-      justify-content: flex-start;
       min-height: 100vh;
       margin: 0;
       padding: 20px;
@@ -21,7 +20,7 @@
     .container {
       background-color: #fff;
       border: 3px solid #995cd6;
-      border-radius: 15px;
+      border-radius: 16px;
       box-shadow: 0 6px 12px rgba(153, 92, 214, 0.2);
       padding: 25px;
       width: 90%;
@@ -48,27 +47,29 @@
       border-radius: 8px;
       margin-top: 5px;
       font-size: 1rem;
+      background-color: #fff;
+      box-sizing: border-box;
     }
 
     .stars {
       display: flex;
       justify-content: center;
       margin-top: 10px;
-      gap: 5px;
+      gap: 6px;
     }
 
     .star {
       font-size: 30px;
-      color: #cbbbe2;
+      color: #d2c0ef;
       cursor: pointer;
-      transition: color 0.2s ease, transform 0.2s ease;
+      transition: color 0.2s ease, transform 0.2s ease, text-shadow 0.2s;
     }
 
     .star:hover,
     .star.selected {
       color: #ffd86b;
       transform: scale(1.15);
-      text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+      text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
     }
 
     button {
@@ -92,17 +93,15 @@
 
     .progress {
       margin-top: 25px;
-      text-align: center;
     }
 
     .bar-container {
-      display: flex;
-      align-items: center;
       background-color: #f3e6ff;
       border-radius: 10px;
       height: 25px;
       overflow: hidden;
       border: 2px solid #995cd6;
+      display: flex;
     }
 
     .bar {
@@ -165,8 +164,8 @@
   <div class="container">
     <h1>🎲 Modo Tablero</h1>
 
-    <label for="juego">Juego jugado:</label>
-    <input type="text" id="juego" placeholder="Ej: Uno, Jenga, etc.">
+    <label for="juego">¿Qué juego jugamos?</label>
+    <input type="text" id="juego" placeholder="Ej: Uno, Jenga, Monopoly...">
 
     <label>Calificación:</label>
     <div class="stars" id="stars">
@@ -177,14 +176,14 @@
       <span class="star" data-value="5">★</span>
     </div>
 
-    <label for="ganador">Ganó:</label>
+    <label for="ganador">¿Quién ganó?</label>
     <select id="ganador">
       <option value="">Seleccionar</option>
       <option value="Anna">Anna</option>
       <option value="Tiago">Tiago</option>
     </select>
 
-    <button onclick="guardarPartida()">Guardar partida 🎯</button>
+    <button id="guardarBtn">Guardar partida 🎯</button>
 
     <div class="progress">
       <div class="score-labels">
@@ -203,6 +202,7 @@
   <script>
     let calificacionSeleccionada = 0;
 
+    // ⭐ Control de las estrellas
     document.querySelectorAll('.star').forEach(star => {
       star.addEventListener('click', function() {
         calificacionSeleccionada = parseInt(this.getAttribute('data-value'));
@@ -216,14 +216,17 @@
       });
     }
 
+    // 📅 Fecha actual
     function obtenerFecha() {
       const d = new Date();
       return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
     }
 
-    function guardarPartida() {
+    // 💾 Guardar partida
+    document.getElementById('guardarBtn').addEventListener('click', () => {
       const juego = document.getElementById('juego').value.trim();
       const ganador = document.getElementById('ganador').value;
+
       if (juego === '' || ganador === '' || calificacionSeleccionada === 0) {
         alert('💜 Completá todos los campos antes de guardar');
         return;
@@ -240,14 +243,17 @@
       partidas.push(partida);
       localStorage.setItem('partidas', JSON.stringify(partidas));
 
+      // limpiar
       document.getElementById('juego').value = '';
       document.getElementById('ganador').value = '';
       calificacionSeleccionada = 0;
       actualizarEstrellas(0);
+
       mostrarHistorial();
       actualizarBarra();
-    }
+    });
 
+    // 📜 Mostrar historial
     function mostrarHistorial() {
       const partidas = JSON.parse(localStorage.getItem('partidas')) || [];
       const cont = document.getElementById('historial');
@@ -267,12 +273,13 @@
       });
     }
 
+    // 📊 Actualizar barra
     function actualizarBarra() {
       const partidas = JSON.parse(localStorage.getItem('partidas')) || [];
-      let annaWins = partidas.filter(p => p.ganador === 'Anna').length;
-      let tiagoWins = partidas.filter(p => p.ganador === 'Tiago').length;
+      const annaWins = partidas.filter(p => p.ganador === 'Anna').length;
+      const tiagoWins = partidas.filter(p => p.ganador === 'Tiago').length;
       const total = annaWins + tiagoWins;
-      let annaPorc = total === 0 ? 50 : (annaWins / total) * 100;
+      const annaPorc = total === 0 ? 50 : (annaWins / total) * 100;
       document.getElementById('bar').style.width = `${annaPorc}%`;
     }
 
