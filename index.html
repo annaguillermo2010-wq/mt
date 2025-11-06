@@ -33,6 +33,10 @@
 
     <div class="scoreboard" id="scoreboard">
       <h2>Marcador</h2>
+      <div class="marcador-labels">
+        <span>💜 Anna</span>
+        <span>💙 Tiago</span>
+      </div>
       <div class="bar-container">
         <div id="annaBar" class="bar"></div>
         <div id="tiagoBar" class="bar"></div>
@@ -139,6 +143,13 @@ button:hover {
   margin-top: 25px;
 }
 
+.marcador-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #995cd6;
+  font-weight: bold;
+}
+
 .bar-container {
   display: flex;
   height: 25px;
@@ -160,7 +171,7 @@ button:hover {
 }
 
 #tiagoBar {
-  background-color: #f6deff;
+  background-color: #d3aef7;
   width: 50%;
 }
 
@@ -288,7 +299,7 @@ function actualizarMarcador() {
 
   document.getElementById('annaBar').style.width = annaPct + '%';
   document.getElementById('tiagoBar').style.width = tiagoPct + '%';
-  document.getElementById('porcentaje').innerText = `Anna ${annaPct}% — Tiago ${tiagoPct}%`;
+  document.getElementById('porcentaje').innerText = `💜 Anna ${annaPct}% — ${tiagoPct}% Tiago 💙`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
