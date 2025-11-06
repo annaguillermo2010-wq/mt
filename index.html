@@ -1,265 +1,301 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>🎲 Modo Tablero</title>
-  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>🎲 Modo Tablero</h1>
 
-    <div class="input-group">
-      <label for="game">¿Qué juego jugamos?</label>
-      <input type="text" id="game" placeholder="Ej: UNO, Damas, Jenga..." />
+  <div class="coupon-container" id="couponBox">
+    <h1>🎲 Modo Tablero 🎯</h1>
+
+    <label for="juego">¿Qué juego jugamos?</label>
+    <input type="text" id="juego" placeholder="Ej: Uno, Jenga, Truco...">
+
+    <label>Calificación:</label>
+    <div class="stars" id="stars">
+      <span class="star" data-value="1">★</span>
+      <span class="star" data-value="2">★</span>
+      <span class="star" data-value="3">★</span>
+      <span class="star" data-value="4">★</span>
+      <span class="star" data-value="5">★</span>
     </div>
 
-    <div class="input-group stars-center">
-      <label>Calificación:</label>
-      <div class="stars" id="stars">
-        <span data-value="1">★</span>
-        <span data-value="2">★</span>
-        <span data-value="3">★</span>
-        <span data-value="4">★</span>
-        <span data-value="5">★</span>
+    <label for="ganador">¿Quién ganó?</label>
+    <select id="ganador">
+      <option value="Anna">Anna 💜</option>
+      <option value="Tiago">Tiago 💙</option>
+      <option value="Empate">Empate ⚖️</option>
+    </select>
+
+    <button onclick="guardar()">Guardar 🕹️</button>
+
+    <div class="scoreboard" id="scoreboard">
+      <h2>Marcador</h2>
+      <div class="bar-container">
+        <div id="annaBar" class="bar"></div>
+        <div id="tiagoBar" class="bar"></div>
       </div>
+      <p id="porcentaje"></p>
     </div>
 
-    <div class="input-group">
-      <label>¿Quién ganó?</label>
-      <select id="winner">
-        <option value="Anna">Anna</option>
-        <option value="Tiago">Tiago</option>
-        <option value="Empate">Empate</option>
-      </select>
-    </div>
-
-    <button id="saveBtn">Guardar Partida</button>
-
-    <div class="scoreboard">
-      <h2>📊 Marcador</h2>
-      <div class="new-bar">
-        <div id="annaBar" class="bar-fill anna"></div>
-        <div id="tiagoBar" class="bar-fill tiago"></div>
-      </div>
-      <p id="scoreText">Anna 0% — Tiago 0%</p>
-    </div>
-
-    <div class="history">
-      <h2>📜 Historial de Partidas</h2>
-      <ul id="historyList"></ul>
+    <div class="history" id="history">
+      <h2>Historial</h2>
     </div>
   </div>
 
 <style>
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #f6deff;
-    color: #4a2868;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-  }
+body {
+  font-family: 'Poppins', 'Arial', sans-serif;
+  background-color: #f6deff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  color: #3d1b5d;
+}
 
-  .container {
-    background: white;
-    margin: 20px;
-    padding: 20px;
-    border-radius: 20px;
-    max-width: 450px;
-    width: 100%;
-    box-shadow: 0 0 15px rgba(153, 92, 214, 0.3);
-  }
+.coupon-container {
+  width: 360px;
+  background-color: #ffffff;
+  border: 3px solid #995cd6;
+  border-radius: 15px;
+  padding: 25px;
+  box-shadow: 0 6px 12px rgba(153, 92, 214, 0.25);
+  text-align: center;
+}
 
-  h1, h2 {
-    text-align: center;
-    color: #995cd6;
-  }
+h1 {
+  font-size: 1.8rem;
+  color: #995cd6;
+  margin-bottom: 20px;
+}
 
-  .input-group {
-    margin-bottom: 20px;
-  }
+label {
+  display: block;
+  margin-top: 10px;
+  text-align: left;
+  color: #995cd6;
+  font-weight: 600;
+}
 
-  .stars-center {
-    text-align: center;
-  }
+input, select {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  border: 1.5px solid #b68ee0;
+  border-radius: 10px;
+  margin-top: 5px;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
 
-  label {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 6px;
-  }
+.stars {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  gap: 6px;
+}
 
-  input, select, button {
-    width: 100%;
-    padding: 10px;
-    border-radius: 10px;
-    border: 1px solid #995cd6;
-    font-size: 16px;
-  }
+.star {
+  font-size: 26px;
+  color: #ccc;
+  cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
 
-  button {
-    background-color: #995cd6;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-  }
+.star:hover,
+.star.selected {
+  color: gold;
+  transform: scale(1.2);
+  text-shadow: 0 0 5px rgba(255, 215, 0, 0.6);
+}
 
-  button:hover {
-    background-color: #7f3cbf;
-  }
+button {
+  margin-top: 20px;
+  width: 100%;
+  padding: 12px;
+  background-color: #995cd6;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.25s ease;
+}
 
-  .stars {
-    display: flex;
-    justify-content: center;
-    gap: 5px;
-    font-size: 28px;
-  }
+button:hover {
+  background-color: #7f45bb;
+}
 
-  .stars span {
-    cursor: pointer;
-    color: #ccc;
-    transition: transform 0.2s, text-shadow 0.2s;
-  }
+.scoreboard {
+  background-color: #f6deff;
+  border: 2px solid #995cd6;
+  border-radius: 12px;
+  padding: 15px;
+  margin-top: 25px;
+}
 
-  .stars span.active {
-    color: #FFD700;
-    text-shadow: 0 0 8px #ffed9b;
-    transform: scale(1.1);
-  }
+.bar-container {
+  display: flex;
+  height: 25px;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1.5px solid #995cd6;
+  margin: 10px 0;
+}
 
-  /* 🎯 Nuevo estilo del marcador */
-  .new-bar {
-    position: relative;
-    height: 28px;
-    background: #f2e6ff;
-    border-radius: 15px;
-    overflow: hidden;
-    border: 2px solid #995cd6;
-    display: flex;
-  }
+.bar {
+  height: 100%;
+  transition: width 0.5s ease;
+}
 
-  .bar-fill {
-    height: 100%;
-    transition: width 0.5s ease;
-  }
+#annaBar {
+  background-color: #995cd6;
+  width: 50%;
+}
 
-  .anna {
-    background: linear-gradient(90deg, #995cd6, #c89bff);
-  }
+#tiagoBar {
+  background-color: #f6deff;
+  width: 50%;
+}
 
-  .tiago {
-    background: linear-gradient(90deg, #f6deff, #eac7ff);
-  }
+#porcentaje {
+  color: #995cd6;
+  font-weight: bold;
+  margin-top: 5px;
+}
 
-  .history ul {
-    list-style: none;
-    padding: 0;
-  }
+.history {
+  background-color: #ffffff;
+  border: 2px solid #d3aef7;
+  border-radius: 12px;
+  margin-top: 25px;
+  padding: 15px;
+  text-align: left;
+  max-height: 250px;
+  overflow-y: auto;
+}
 
-  .history li {
-    background: #f9f1ff;
-    margin: 6px 0;
-    padding: 10px;
-    border-radius: 10px;
-    font-size: 15px;
-  }
+.history h2 {
+  text-align: center;
+  color: #995cd6;
+  margin-bottom: 10px;
+}
 
-  @media (max-width: 480px) {
-    .container {
-      padding: 15px;
-    }
+.history-item {
+  background-color: #f6deff;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-left: 4px solid #995cd6;
+  border-radius: 8px;
+  animation: aparecer 0.5s ease;
+}
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.history-item p {
+  margin: 3px 0;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .coupon-container {
+    width: 92%;
+    padding: 18px;
   }
+}
 </style>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-  const stars = document.querySelectorAll("#stars span");
-  const saveBtn = document.getElementById("saveBtn");
-  const historyList = document.getElementById("historyList");
-  const annaBar = document.getElementById("annaBar");
-  const tiagoBar = document.getElementById("tiagoBar");
-  const scoreText = document.getElementById("scoreText");
+let calificacion = 0;
 
-  let selectedRating = 0;
+document.querySelectorAll('.star').forEach(star => {
+  star.addEventListener('click', function() {
+    calificacion = parseInt(this.getAttribute('data-value'));
+    actualizarEstrellas(calificacion);
+  });
+});
 
-  // ⭐ Calificación con estrellas
-  stars.forEach(star => {
-    star.addEventListener("click", () => {
-      selectedRating = star.dataset.value;
-      stars.forEach(s => s.classList.remove("active"));
-      star.classList.add("active");
-      let prev = star.previousElementSibling;
-      while (prev) {
-        prev.classList.add("active");
-        prev = prev.previousElementSibling;
-      }
-    });
+function actualizarEstrellas(valor) {
+  document.querySelectorAll('.star').forEach(star => {
+    star.classList.toggle('selected', parseInt(star.getAttribute('data-value')) <= valor);
+  });
+}
+
+function guardar() {
+  const juego = document.getElementById('juego').value;
+  const ganador = document.getElementById('ganador').value;
+  const fecha = new Date().toLocaleDateString();
+
+  if (juego.trim() === '' || calificacion === 0) {
+    alert('🎲 Completá todo antes de guardar.');
+    return;
+  }
+
+  const partida = { juego, calificacion, ganador, fecha };
+  let partidas = JSON.parse(localStorage.getItem('partidas')) || [];
+  partidas.push(partida);
+  localStorage.setItem('partidas', JSON.stringify(partidas));
+
+  document.getElementById('juego').value = '';
+  calificacion = 0;
+  actualizarEstrellas(0);
+  mostrarHistorial();
+  actualizarMarcador();
+}
+
+function mostrarHistorial() {
+  const partidas = JSON.parse(localStorage.getItem('partidas')) || [];
+  const historyDiv = document.getElementById('history');
+  historyDiv.innerHTML = '<h2>Historial</h2>';
+
+  partidas.forEach(p => {
+    const item = document.createElement('div');
+    item.classList.add('history-item');
+
+    const estrellas = '★'.repeat(p.calificacion) + '☆'.repeat(5 - p.calificacion);
+
+    item.innerHTML = `
+      <p><strong>Juego:</strong> ${p.juego}</p>
+      <p><strong>Ganador:</strong> ${p.ganador}</p>
+      <p><strong>Calificación:</strong> <span style="color:gold">${estrellas}</span></p>
+      <p><small>${p.fecha}</small></p>
+    `;
+    historyDiv.appendChild(item);
+  });
+}
+
+function actualizarMarcador() {
+  const partidas = JSON.parse(localStorage.getItem('partidas')) || [];
+  let anna = 0, tiago = 0;
+
+  partidas.forEach(p => {
+    if (p.ganador === 'Anna') anna++;
+    else if (p.ganador === 'Tiago') tiago++;
   });
 
-  // 🔄 Cargar historial desde localStorage
-  function loadHistory() {
-    return JSON.parse(localStorage.getItem("partidas")) || [];
-  }
+  const total = anna + tiago;
+  const annaPct = total ? (anna / total * 100).toFixed(1) : 50;
+  const tiagoPct = total ? (tiago / total * 100).toFixed(1) : 50;
 
-  function saveHistory(partidas) {
-    localStorage.setItem("partidas", JSON.stringify(partidas));
-  }
+  document.getElementById('annaBar').style.width = annaPct + '%';
+  document.getElementById('tiagoBar').style.width = tiagoPct + '%';
+  document.getElementById('porcentaje').innerText = `Anna ${annaPct}% — Tiago ${tiagoPct}%`;
+}
 
-  // 🧮 Actualizar marcador
-  function renderHistory() {
-    const partidas = loadHistory();
-    historyList.innerHTML = "";
-    partidas.forEach(p => {
-      const li = document.createElement("li");
-      li.textContent = `${p.fecha} — Juego: ${p.juego} | Ganó: ${p.ganador} | ⭐${p.calificacion}`;
-      historyList.appendChild(li);
-    });
-
-    const annaWins = partidas.filter(p => p.ganador === "Anna").length;
-    const tiagoWins = partidas.filter(p => p.ganador === "Tiago").length;
-    const total = annaWins + tiagoWins;
-
-    const annaPct = total ? Math.round((annaWins / total) * 100) : 50;
-    const tiagoPct = total ? Math.round((tiagoWins / total) * 100) : 50;
-
-    annaBar.style.width = annaPct + "%";
-    tiagoBar.style.width = tiagoPct + "%";
-    scoreText.textContent = `Anna ${annaPct}% — Tiago ${tiagoPct}% (${total} partidas)`;
-  }
-
-  // 💾 Guardar nueva partida
-  saveBtn.addEventListener("click", () => {
-    const juego = document.getElementById("game").value.trim();
-    const ganador = document.getElementById("winner").value;
-
-    if (!juego || !selectedRating || !ganador) {
-      alert("Completá todos los campos antes de guardar.");
-      return;
-    }
-
-    const partidas = loadHistory();
-    const nueva = {
-      fecha: new Date().toLocaleString(),
-      juego,
-      calificacion: selectedRating,
-      ganador
-    };
-    partidas.push(nueva);
-    saveHistory(partidas);
-    renderHistory();
-
-    // Reiniciar campos
-    document.getElementById("game").value = "";
-    selectedRating = 0;
-    stars.forEach(s => s.classList.remove("active"));
-  });
-
-  renderHistory();
+document.addEventListener('DOMContentLoaded', () => {
+  mostrarHistorial();
+  actualizarMarcador();
 });
 </script>
+
 </body>
 </html>
